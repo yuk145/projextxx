@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор и Оценка сложности пароля - Randomus.ru</title>
+    <link rel="icon" href="https://randomus.ru/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f7f7f7;
+            --text-color: #333;
+            --primary-color: #7986CB;
+            --secondary-color: #9FA8DA;
+            --accent-color: #FFB74D;
+            --input-border-color: #e0e0e0;
+            --indicator-bg: #fff;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --small-text-color: #777;
+        }
+
+        .dark-mode {
+            --bg-color: #303030;
+            --text-color: #fff;
+            --primary-color: #90A4AE;
+            --secondary-color: #B0BEC5;
+            --accent-color: #FFCC80;
+            --input-border-color: #555;
+            --indicator-bg: #424242;
+            --shadow-color: rgba(255, 255, 255, 0.1);
+            --small-text-color: #bbb;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            width: 85%;
+            max-width: 900px;
+            margin: 20px;
+            background-color: var(--indicator-bg);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px var(--shadow-color);
+            text-align: left;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 2px var(--shadow-color);
+            font-weight: 700;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        p {
+            color: var(--text-color);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        input[type="number"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--input-border-color);
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        input[type="number"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        select {
+            height: 50px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .checkbox-group label {
+            display: inline-flex;
+            align-items: center;
+            font-weight: 500;
+            cursor: pointer;
+            color: #555;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 10px var(--shadow-color);
+        }
+
+        #passwordResult {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px dashed var(--input-border-color);
+            border-radius: 10px;
+            background-color: var(--indicator-bg);
+            color: var(--text-color);
+            font-size: 1.2em;
+            word-break: break-all;
+            text-align: center;
+            font-weight: bold;
+            position: relative;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #copyButton {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            margin-left: 10px;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+
+        #copyButton:hover {
+            background-color: #F48FB1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 7px var(--shadow-color);
+        }
+
+        #generationType {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--input-border-color);
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            margin-bottom: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        #strengthIndicator {
+            margin-top: 30px;
+            padding: 14px;
+            border: 2px solid var(--input-border-color);
+            border-radius: 10px;
+            background-color: var(--indicator-bg);
+            text-align: center;
+            font-size: 1.1em;
+            color: var(--text-color);
+            font-weight: 600;
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+
+        .strength-weak {
+            background-color: #FFCDD2;
+            color: #D32F2F;
+        }
+
+        .strength-medium {
+            background-color: #FFEB3B;
+            color: #F57F17;
+        }
+
+        .strength-strong {
+            background-color: #C8E6C9;
+            color: #388E3C;
+        }
+
+        #strengthIndicator {
+            display: none;
+        }
+
+        #themeButton {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            font-weight: 500;
+        }
+
+        #themeButton:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 7px var(--shadow-color);
+        }
+
+        #themeButton i {
+            margin-right: 8px;
+        }
+
+       #themeButton i.fa-sun {
+            display: inline;
+        }
+
+       #themeButton i.fa-moon {
+            display: inline;
+        }
+
+       .dark-mode  #themeButton i.fa-sun {
+            display: none;
+        }
+        .dark-mode #themeButton i.fa-moon {
+             display: inline;
+
+        }
+
+        .dark-mode #copyButton {
+            background-color: #FF8A65;
+        }
+
+        .dark-mode #copyButton:hover {
+            background-color:  #FF7043;
+        }
+
+         p, label {
+            color: var(--text-color);
+        }
+        .dark-mode p, .dark-mode label {
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Генератор и Оценка сложности пароля</h1>
+
+    <p>Нужен надежный пароль? Этот генератор поможет! Выберите длину и типы символов, и он создаст для вас пароль, который будет сложно взломать. Или проверьте свой пароль на стойкость!</p>
+
+    <button id="themeButton" onclick="toggleTheme()"><i class="fas fa-sun"></i><i class="fas fa-moon"></i> Сменить тему</button>
+
+    <h2>Генератор паролей</h2>
+    <div class="form-group">
+        <label for="generationType">Тип генерации:</label>
+        <select id="generationType" onchange="toggleOptions()">
+            <option value="random">Случайный пароль</option>
+            <option value="pronounceable">Легкопроизносимый пароль</option>
+        </select>
+    </div>
+
+    <div id="randomOptions" class="form-group">
+        <label for="passwordLength">Длина пароля:</label>
+        <input type="number" id="passwordLength" value="16" min="6" max="64">
+
+        <div class="form-group">
+            <label>Включить:</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="includeLowercase" checked> Строчные буквы</label>
+                <label><input type="checkbox" id="includeUppercase" checked> Прописные буквы</label>
+                <label><input type="checkbox" id="includeNumbers" checked> Цифры</label>
+                <label><input type="checkbox" id="includeSymbols" checked> Символы</label>
+            </div>
+        </div>
+    </div>
+
+    <div id="pronounceableOptions" class="form-group" style="display: none;">
+        <label for="syllableCount">Количество слогов:</label>
+        <input type="number" id="syllableCount" value="4" min="2" max="10">
+    </div>
+
+    <button onclick="generatePasswordAndShowStrength()">Сгенерировать пароль</button>
+
+    <div id="passwordResult">
+        Здесь будет ваш пароль
+        <button id="copyButton" onclick="copyPassword()" style="display: none;"><i class="fas fa-copy"></i> Копировать</button>
+    </div>
+
+     <h2>Проверка сложности пароля</h2>
+    <div class="form-group">
+        <label for="passwordInput">Введите пароль для оценки:</label>
+        <input type="password" id="passwordInput" oninput="updateStrength()">
+    </div>
+
+    <div id="strengthIndicator">
+        Сложность пароля: <span id="strengthText">Не определена</span>
+    </div>
+
+</div>
+
+<script>
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        updateThemeButtonIcon();
+    }
+
+   function updateThemeButtonIcon() {
+       const themeButton = document.getElementById('themeButton');
+       const sunIcon = themeButton.querySelector('.fa-sun');
+       const moonIcon = themeButton.querySelector('.fa-moon');
+
+       if (document.body.classList.contains('dark-mode')) {
+           sunIcon.style.display = 'none';
+           moonIcon.style.display = 'inline';
+       } else {
+           sunIcon.style.display = 'inline';
+           moonIcon.style.display = 'none';
+       }
+   }
+
+    function toggleOptions() {
+        const generationType = document.getElementById("generationType").value;
+        const randomOptions = document.getElementById("randomOptions");
+        const pronounceableOptions = document.getElementById("pronounceableOptions");
+
+        if (generationType === "random") {
+            randomOptions.style.display = "block";
+            pronounceableOptions.style.display = "none";
+        } else {
+            randomOptions.style.display = "none";
+            pronounceableOptions.style.display = "block";
+        }
+    }
+
+    function generatePasswordAndShowStrength() {
+        generatePassword();
+    }
+
+    function generatePassword() {
+        const generationType = document.getElementById("generationType").value;
+
+        if (generationType === "random") {
+            generateRandomPassword();
+        } else {
+            generatePronounceablePassword();
+        }
+    }
+
+    function generateRandomPassword() {
+        const length = document.getElementById("passwordLength").value;
+        let charset = "";
+        if (document.getElementById("includeLowercase").checked) {
+            charset += "abcdefghijklmnopqrstuvwxyz";
+        }
+        if (document.getElementById("includeUppercase").checked) {
+            charset += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        }
+        if (document.getElementById("includeNumbers").checked) {
+            charset += "0123456789";
+        }
+        if (document.getElementById("includeSymbols").checked) {
+            charset += "!@#$%^&*()_+=-`~[]\{}|;':\",./<>?";
+        }
+
+        if (!charset) {
+            alert("Выберите хотя бы один набор символов!");
+            return;
+            document.getElementById("strengthIndicator").style.display = "none";
+        }
+
+        let password = "";
+        for (let i = 0; i < length, i < 65; i++) {
+            const randomIndex = Math.floor(Math.random() * charset.length);
+            password += charset[randomIndex];
+        }
+
+        document.getElementById("passwordResult").textContent = password;
+        document.getElementById("copyButton").style.display = "inline-block";
+    }
+
+    function generatePronounceablePassword() {
+        const syllableCount = document.getElementById("syllableCount").value;
+        const consonants = "bcdfghjklmnpqrstvwxyz";
+        const vowels = "aeiou";
+        let password = "";
+
+        for (let i = 0; i < syllableCount; i++) {
+            password += consonants[Math.floor(Math.random() * consonants.length)];
+            password += vowels[Math.floor(Math.random() * vowels.length)];
+        }
+
+        document.getElementById("passwordResult").textContent = password;
+        document.getElementById("copyButton").style.display = "inline-block";
+    }
+
+    function copyPassword() {
+        const passwordText = document.getElementById("passwordResult").textContent;
+        navigator.clipboard.writeText(passwordText)
+            .then(() => {
+                alert("Пароль скопирован в буфер обмена!");
+            })
+            .catch(err => {
+                console.error('Не удалось скопировать пароль: ', err);
+                alert("Не удалось скопировать пароль. Пожалуйста, выделите его и скопируйте вручную.");
+            });
+    }
+
+    function updateStrength() {
+        const password = document.getElementById("passwordInput").value;
+        const passwordLength = password.length;
+        let charsetLength = 0;
+
+        const hasLowercase = /[a-z]/.test(password);
+        const hasUppercase = /[A-Z]/.test(password);
+        const hasNumbers = /[0-9]/.test(password);
+        const hasSymbols = /[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/.test(password);
+
+        if (hasLowercase) charsetLength += 26;
+        if (hasUppercase) charsetLength += 26;
+        if (hasNumbers) charsetLength += 10;
+        if (hasSymbols) charsetLength += 32;
+
+        let strength = "Не определена";
+        let strengthClass = "";
+
+        if (passwordLength === 0) {
+            strength = "Введите пароль";
+            strengthClass = "strength-weak";
+        } else if (passwordLength < 8) {
+            strength = "Слишком короткий";
+            strengthClass = "strength-weak";
+        } else {
+            let complexityScore = 0;
+            if (hasLowercase) complexityScore++;
+            if (hasUppercase) complexityScore++;
+            if (hasNumbers) complexityScore++;
+            if (hasSymbols) complexityScore++;
+
+            if (complexityScore < 2) {
+                strength = "Очень слабый";
+                strengthClass = "strength-weak";
+            } else if (complexityScore < 3) {
+                strength = "Слабый";
+                strengthClass = "strength-medium";
+            } else if (passwordLength < 12) {
+                strength = "Средний";
+                strengthClass = "strength-medium";
+            } else {
+                strength = "Сильный";
+                strengthClass = "strength-strong";
+            }
+        }
+
+        const strengthTextElement = document.getElementById("strengthText");
+        strengthTextElement.textContent = strength;
+        strengthTextElement.className = "";
+        strengthTextElement.classList.add(strengthClass);
+
+           document.getElementById("strengthIndicator").style.display = "block";
+
+    }
+
+    toggleOptions();
+    updateThemeButtonIcon();
+</script>
+
+</body>
+</html>
